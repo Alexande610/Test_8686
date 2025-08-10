@@ -23,8 +23,7 @@ namespace LittleFishBeauty.Data
         public DbSet<ChiTietGioHang> ChiTietGioHang { get; set; }
         public DbSet<DonHang> DonHang { get; set; }
         public DbSet<ChiTietDonHang> ChiTietDonHang { get; set; }
-        // Bảng DanhGia sẽ được thêm sau khi cần thiết
-        // public DbSet<DanhGia> DanhGia { get; set; }
+        public DbSet<DanhGia> DanhGia { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,9 +50,8 @@ namespace LittleFishBeauty.Data
             modelBuilder.Entity<AnhSanPham>()
                 .HasCheckConstraint("CK_AnhSanPham_LoaiAnh", "LoaiAnh IN ('chinh', 'phu', '360')");
 
-            // Tạm comment vì chưa có bảng DanhGia
-            // modelBuilder.Entity<DanhGia>()
-            //     .HasCheckConstraint("CK_DanhGia_SoSao", "SoSao BETWEEN 1 AND 5");
+            modelBuilder.Entity<DanhGia>()
+                .HasCheckConstraint("CK_DanhGia_SoSao", "SoSao BETWEEN 1 AND 5");
 
             // Configure unique constraints
             modelBuilder.Entity<TaiKhoan>()

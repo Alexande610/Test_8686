@@ -1,0 +1,129 @@
+@{
+    ViewData["Title"] = "Cảm ơn đánh giá";
+    Layout = "~/Areas/Customer/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link href="~/css/chitiet-sanpham.css" rel="stylesheet" asp-append-version="true">
+}
+
+<div class="container-fluid camondanhgia-container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="thank-you-card">
+                <div class="thank-you-icon">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h2 class="thank-you-title mt-3">Cảm ơn bạn đã đánh giá!</h2>
+                <p class="thank-you-message">
+                    Đánh giá của bạn về sản phẩm <strong>@ViewBag.ProductName</strong> đã được ghi nhận thành công.
+                </p>
+                <p class="thank-you-subtitle">
+                    Ý kiến đóng góp của bạn sẽ giúp những khách hàng khác có thêm thông tin để đưa ra quyết định mua hàng tốt hơn.
+                </p>
+                <div class="action-buttons mt-4">
+                    <div class="d-flex justify-content-center align-items-center" style="gap: 40px;">
+                        <a href="@Url.Action("Index", "ChiTiet", new { area = "Customer", id = ViewBag.ProductId })" 
+                           class="btn btn-outline-primary" style="min-width: 180px;">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại sản phẩm
+                        </a>
+                        <a href="@Url.Action("Index", "SanPham", new { area = "Customer" })" 
+                           class="btn btn-success" style="min-width: 200px; margin-left: 20px;">
+                            <i class="fas fa-shopping-bag me-1"></i> Tiếp tục mua sắm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.camondanhgia-container {
+    padding: 2rem 0;
+    min-height: calc(100vh - 160px);
+}
+
+.thank-you-card {
+    background: white;
+    padding: 3rem 2rem;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: 2px solid #e8f5e8;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.thank-you-title {
+    color: #2d5016;
+    font-weight: bold;
+    font-size: 1.8rem;
+}
+
+.thank-you-message {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.thank-you-subtitle {
+    color: #888;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.action-buttons .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: 1rem;
+}
+
+.btn-outline-primary {
+    background-color: transparent;
+    border-color: #2d5016;
+    color: #2d5016;
+    border-width: 2px;
+}
+
+.btn-outline-primary:hover {
+    background-color: #2d5016;
+    border-color: #2d5016;
+    color: white;
+}
+
+.btn-primary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-primary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn-success {
+    background-color: #2d5016;
+    border-color: #2d5016;
+}
+
+.btn-success:hover {
+    background-color: #1d3309;
+    border-color: #1d3309;
+}
+
+/* Thêm khoảng cách với footer */
+.container.mt-5.mb-5 {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+}
+</style>

@@ -280,18 +280,21 @@
                 </button>
                 <div class="review-form-container" id="reviewFormContainer" style="display: none;">
                     <h6>Thêm đánh giá của bạn</h6>
-                    <form asp-action="ThemDanhGia" asp-controller="ChiTiet" asp-area="Customer" method="post" id="reviewForm">
+                    <form asp-action="ThemDanhGia" asp-controller="ChiTiet" asp-area="Customer" method="post" enctype="multipart/form-data" id="reviewForm">
                         <input type="hidden" name="productId" value="@productId" />
                         <div class="mb-3">
                             <label class="form-label">Đánh giá sản phẩm này *</label>
                             <div class="rating-input">
-                                <input type="radio" name="rating" value="5" id="star5"><label for="star5">⭐</label>
-                                <input type="radio" name="rating" value="4" id="star4"><label for="star4">⭐</label>
-                                <input type="radio" name="rating" value="3" id="star3"><label for="star3">⭐</label>
-                                <input type="radio" name="rating" value="2" id="star2"><label for="star2">⭐</label>
-                                <input type="radio" name="rating" value="1" id="star1"><label for="star1">⭐</label>
+                                <input type="radio" name="rating" value="5" id="star5" required><label for="star5">⭐</label>
+                                <input type="radio" name="rating" value="4" id="star4" required><label for="star4">⭐</label>
+                                <input type="radio" name="rating" value="3" id="star3" required><label for="star3">⭐</label>
+                                <input type="radio" name="rating" value="2" id="star2" required><label for="star2">⭐</label>
+                                <input type="radio" name="rating" value="1" id="star1" required><label for="star1">⭐</label>
                             </div>
                             <div class="rating-text" id="ratingText" style="margin-top: 10px; font-weight: 500; color: var(--primary-green);"></div>
+                            <div class="rating-error" id="ratingError" style="display: none; color: red; font-size: 0.9rem; margin-top: 5px;">
+                                Vui lòng chọn số sao để đánh giá sản phẩm
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="comment" class="form-label">Mô tả nhận xét *</label>
@@ -313,7 +316,7 @@
                         </div>
                         <div class="form-actions">
                             <button type="button" class="btn btn-outline-secondary" onclick="hideReviewForm()">Huỷ bỏ</button>
-                            <button type="submit" class="btn btn-success">Gửi</button>
+                            <button type="submit" class="btn btn-success" onclick="return validateReviewForm()">Gửi</button>
                         </div>
                     </form>
                 </div>
@@ -354,7 +357,13 @@
                             @if (!string.IsNullOrEmpty(danhGia.AnhDanhGia))
                             {
                                 <div class="review-images">
-                                    <img src="@danhGia.AnhDanhGia" alt="Ảnh đánh giá" class="review-photo" onclick="openImageModal(this.src)">
+                                    @{
+                                        var imageUrls = danhGia.AnhDanhGia.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                                    }
+                                    @foreach (var imageUrl in imageUrls)
+                                    {
+                                        <img src="@imageUrl.Trim()" alt="Ảnh đánh giá" class="review-photo" onclick="openImageModal(this.src)">
+                                    }
                                 </div>
                             }
                         </div>
@@ -586,7 +595,9 @@
             document.getElementById('reviewFormContainer').style.display = 'none';
             // Reset form
             document.getElementById('reviewForm').reset();
+            document.getElementById('selectedImages').innerHTML = '';
             updateCharCount();
+            updateRatingText();
         }
 
         function updateCharCount() {
@@ -630,9 +641,38 @@
                 input.addEventListener('change', function() {
                     if (this.checked) {
                         ratingText.textContent = ratingTexts[this.value];
+                        // Hide rating error when user selects a rating
+                        var ratingError = document.getElementById('ratingError');
+                        if (ratingError) {
+                            ratingError.style.display = 'none';
+                        }
                     }
                 });
             });
+        }
+
+        function validateReviewForm() {
+            var ratingInputs = document.querySelectorAll('input[name="rating"]');
+            var isRatingSelected = false;
+            
+            for (var i = 0; i < ratingInputs.length; i++) {
+                if (ratingInputs[i].checked) {
+                    isRatingSelected = true;
+                    break;
+                }
+            }
+            
+            var ratingError = document.getElementById('ratingError');
+            
+            if (!isRatingSelected) {
+                ratingError.style.display = 'block';
+                ratingError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            } else {
+                ratingError.style.display = 'none';
+            }
+            
+            return true;
         }
 
         function handleImageUpload() {
@@ -643,13 +683,16 @@
                 var files = e.target.files;
                 var maxFiles = 5;
                 
-                if (files.length > maxFiles) {
+                // Check total files count (existing + new)
+                var currentImageCount = preview.querySelectorAll('.preview-image-container').length;
+                
+                if (currentImageCount + files.length > maxFiles) {
                     alert('Bạn chỉ có thể chọn tối đa ' + maxFiles + ' hình ảnh.');
                     return;
                 }
                 
-                // Clear previous previews
-                preview.innerHTML = '';
+                // Don't clear previous previews - keep existing images
+                // preview.innerHTML = '';
                 
                 for (var i = 0; i < files.length; i++) {
                     var file = files[i];

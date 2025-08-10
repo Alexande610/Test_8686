@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LittleFishBeauty")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a8ad00ec14b5c3f3293dc4c8c504a01e74a1519f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bea21edd779f1ac9a4f137f169b0b80fdd58b6da")]
 [assembly: System.Reflection.AssemblyProductAttribute("LittleFishBeauty")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LittleFishBeauty")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

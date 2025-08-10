@@ -106,70 +106,98 @@ namespace LittleFishBeauty.Areas.Customer.Controllers
             }
         }
 
-        /*
         [HttpPost]
-        public async Task<IActionResult> ThemDanhGia(int productId, int rating, string comment)
+        public async Task<IActionResult> ThemDanhGia(int productId, int rating, string comment, List<IFormFile> images)
         {
             try
             {
+                // Debug logging
+                Console.WriteLine($"ThemDanhGia called - productId: {productId}, rating: {rating}, comment length: {comment?.Length ?? 0}, images count: {images?.Count ?? 0}");
+                
+                // Kiểm tra bắt buộc chọn số sao
+                if (rating < 1 || rating > 5)
+                {
+                    TempData["ErrorMessage"] = "Vui lòng chọn số sao để đánh giá sản phẩm.";
+                    return RedirectToAction("Index", new { id = productId });
+                }
+
                 var sanPham = await _context.SanPham.FindAsync(productId);
                 if (sanPham == null)
                 {
-                    return Json(new { success = false, message = "Sản phẩm không tồn tại" });
+                    TempData["ErrorMessage"] = "Sản phẩm không tồn tại.";
+                    return RedirectToAction("Index", new { id = productId });
                 }
 
-                // TODO: Get current user ID from authentication
-                // For now, we'll skip adding the review
+                // Tạo đánh giá mới (tạm thời không cần login, dùng ID_TaiKhoan = 1)
                 var danhGia = new DanhGia
                 {
                     ID_SanPham = productId,
-                    ID_TaiKhoan = currentUserId,
+                    ID_TaiKhoan = 1, // TODO: Thay bằng current user ID khi có authentication
                     SoSao = rating,
-                    BinhLuan = comment,
+                    BinhLuan = comment?.Trim(),
                     NgayDanhGia = DateTime.Now
                 };
 
-                _context.DanhGias.Add(danhGia);
+                // Xử lý upload hình ảnh (lưu tất cả hình được chọn)
+                if (images != null && images.Count > 0)
+                {
+                    var imageUrls = new List<string>();
+                    
+                    // Giới hạn tối đa 5 hình
+                    var maxImages = Math.Min(images.Count, 5);
+                    
+                    for (int i = 0; i < maxImages; i++)
+                    {
+                        var image = images[i];
+                        if (image.Length > 0)
+                        {
+                            // Tạo tên file unique
+                            var fileName = $"review_{productId}_{DateTime.Now.Ticks}_{i}_{Path.GetExtension(image.FileName)}";
+                            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "reviews");
+                            
+                            // Tạo thư mục nếu chưa tồn tại
+                            Directory.CreateDirectory(uploadsPath);
+                            
+                            var filePath = Path.Combine(uploadsPath, fileName);
+                            
+                            // Lưu file
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await image.CopyToAsync(stream);
+                            }
+                            
+                            imageUrls.Add($"/images/reviews/{fileName}");
+                        }
+                    }
+                    
+                    // Lưu tất cả URL ảnh vào AnhDanhGia (ghép bằng dấu ';')
+                    if (imageUrls.Count > 0)
+                    {
+                        danhGia.AnhDanhGia = string.Join(";", imageUrls);
+                    }
+                }
+
+                _context.DanhGia.Add(danhGia);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, message = "Đã thêm đánh giá" });
+                // Redirect đến trang cảm ơn
+                TempData["SuccessMessage"] = "Cảm ơn bạn đã đánh giá sản phẩm!";
+                return RedirectToAction("CamOnDanhGia", new { productId = productId });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+                TempData["ErrorMessage"] = $"Có lỗi xảy ra: {ex.Message}";
+                return RedirectToAction("Index", new { id = productId });
             }
         }
 
-        public async Task<IActionResult> LayDanhGia(int productId, int page = 1)
+        public async Task<IActionResult> CamOnDanhGia(int productId)
         {
-            try
-            {
-                const int pageSize = 5;
-                var danhGias = await _context.DanhGias
-                    .Include(d => d.TaiKhoan)
-                    .Where(d => d.ID_SanPham == productId)
-                    .OrderByDescending(d => d.NgayDanhGia)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Select(d => new
-                    {
-                        d.ID_DanhGia,
-                        d.SoSao,
-                        d.BinhLuan,
-                        d.NgayDanhGia,
-                        TenNguoiDung = d.TaiKhoan.HoTen ?? d.TaiKhoan.Email,
-                        d.AnhDanhGia
-                    })
-                    .ToListAsync();
-
-                return Json(new { success = true, reviews = danhGias });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
-            }
+            var sanPham = await _context.SanPham.FindAsync(productId);
+            ViewBag.ProductName = sanPham?.TenSanPham ?? "Sản phẩm";
+            ViewBag.ProductId = productId;
+            return View();
         }
-        */
 
         public async Task<IActionResult> LaySanPhamGoiY(int productId)
         {
